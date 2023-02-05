@@ -2,6 +2,7 @@
 
 namespace DTApi\Http\Controllers;
 
+use App\Models\User;
 use DTApi\Models\Job;
 use DTApi\Http\Requests;
 use DTApi\Models\Distance;
@@ -35,17 +36,22 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-        if($user_id = $request->get('user_id')) {
+        // if Auth is used then "Auth::user()->hasRole('user')' will be used
+        // otherwise below code
+
+        $user_id = $request->get('user_id');
+        $user = User::find($user_id);
+        if($user_id = $user) {
 
             $response = $this->repository->getUsersJobs($user_id);
 
         }
-        elseif($request->__authenticatedUser->user_type == env('ADMIN_ROLE_ID') || $request->__authenticatedUser->user_type == env('SUPERADMIN_ROLE_ID'))
+        elseif($request->user_type == env('ADMIN_ROLE_ID') || $request->user_type == env('SUPERADMIN_ROLE_ID'))
         {
             $response = $this->repository->getAll($request);
         }
 
-        return response($response);
+        return response()->json($response);
     }
 
     /**
@@ -56,7 +62,7 @@ class BookingController extends Controller
     {
         $job = $this->repository->with('translatorJobRel.user')->find($id);
 
-        return response($job);
+        return response()->json([$job]);
     }
 
     /**
@@ -69,7 +75,7 @@ class BookingController extends Controller
 
         $response = $this->repository->store($request->__authenticatedUser, $data);
 
-        return response($response);
+        return response()->([$response[]);
 
     }
 
@@ -98,7 +104,7 @@ class BookingController extends Controller
 
         $response = $this->repository->storeJobEmail($data);
 
-        return response($response);
+        return response()->json([$response]);
     }
 
     /**
@@ -110,7 +116,7 @@ class BookingController extends Controller
         if($user_id = $request->get('user_id')) {
 
             $response = $this->repository->getUsersJobsHistory($user_id, $request);
-            return response($response);
+            return response()->json([$response]);
         }
 
         return null;
